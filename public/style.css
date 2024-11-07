@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&display=swap');
+
+input {
+    padding: 10px;
+}
+.main_button {
+    cursor:pointer
+}
+
+body {
+    margin: 0;
+}
+#menus {
+    position:sticky;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    z-index: 2;
+}
+
+h1 {
+    font-weight: bolder;
+    font-family: "Scheherazade New", serif;
+    font-size: 72px;
+    margin: -10px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid;
+    border-radius: 4px;
+    background-color: white;
+}
+
+input[type="button"] {
+    cursor: pointer;
+}
+
+#canvas {
+    position:fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+#end-game-screen {
+    padding: 16px;
+    background-color: white;
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monkey Board</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body align="center">
+    <div id="game">
+        <div id="menus">
+            <div id="nickname-menu">
+                <h1>
+                    Monkey Board
+                </h1>    
+                Joining room <b><span id="span_room_key_nickname_menu"></span></b><br/>
+                <input type="text" value="" placeholder="Nickname" id="input_nickname_nickname_menu"><br />
+                <input type="button" value="Join Room" id="button_join_room_nickname_menu">
+                <input type="button" value="Cancel" class="buttons_back_to_main_menu">
+            </div>
+            <div id="main-menu">
+                <h1>
+                    Monkey Board
+                </h1>    
+                <input type="text" value="" placeholder="Nickname" id="input_nickname_main_menu"><br /><br />
+                <input type="button" value="Private Room" id="button_private_room">
+                <br /> or <br />
+                <input type="button" value="Find Match" id="button_find_match">
+
+            </div>
+            <div id="finding-match-screen">
+                <b>Nickname:</b> <span id="span_nickname_finding_match"></span><br/>
+                <b>Waiting for other player to join...</b><br/><br/>
+                <input type="button" value="Cancel" id="button_cancel_queue">
+            </div>
+            <div id="private-room-menu">
+                <b>Nickname:</b> <span id="span_nickname_private_room_menu"></span><br/>
+                <input type="button" value="Create Room" id="button_create_room">
+                <br /> or <br />
+                <input type="text" value="" placeholder="Room Key" id="input_room_key">
+                <input type="button" value="Enter Room" id="button_enter_room"><br/><br/>
+                <input type="button" value="Back" class="buttons_back_to_main_menu">
+            </div>
+            <div id="game-lobby">
+                <b>Room Key: </b><span id="room-key"></span>
+                <input type="button" value="Copy" id="button_copy_room_key"><br/>
+                <b>Players:</b><br />
+                <span id="player-list"></span><br />
+                <!-- <b>Spectators:</b><br />
+                <span id="spectator-list"></span><br /> -->
+                <input type="button" value="Get Invite Link" id="button_copy_room_invite_link"><br/>
+                <br/>
+                <input type="button" value="Leave Room" id="button_leave_room">
+                <input type="button" value="Start Game" id="button_start_game">
+            </div>
+            <div id="end-game-screen">
+                Winner: <b><span id="winner-end-screen"></span></b><br/><br/>
+                    
+                <input type="button" value="Quit" id="button_quit_game">
+            </div>
+        </div>
+        <canvas id="canvas"></canvas>
+
+    </div>
+    <script src="index.js" type="module"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

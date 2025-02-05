@@ -192,10 +192,14 @@ export default function createState (canvas) {
         // Check if clicked in a card
         const cards = state.players[localState.playerIndex].cards
 
-        for (let cardIndex in cards) {
-            if (xClick > canvas.width/2+(120*(cardIndex-1))-25 && xClick < canvas.width/2+(120*(cardIndex-1))-25 + 50) {
-                if (yClick > (canvas.height-160)+80 && yClick < (canvas.height-160)+130) {
+        // const baseX = boardMarginX + (cardIndex * spaceBetweenCards) +  spaceBetweenCards/2 - 25;
+        // const baseY = playerIndex == myIndex ? (boardMarginY + board.height*board.tileSize + 42 ) : boardMarginY - 92;
 
+        const spaceBetweenCards = state.board.width*state.board.tileSize/(cards.length)
+
+        for (let cardIndex in cards) {
+            if (xClick > boardMarginX + spaceBetweenCards/2 - 25 + (cardIndex*spaceBetweenCards) && xClick < boardMarginX + spaceBetweenCards/2 + 25 + (cardIndex*spaceBetweenCards)) {
+                if (yClick > boardMarginY + state.board.height*state.board.tileSize + 42  && yClick < boardMarginY + state.board.height*state.board.tileSize + 92) {
                     if (localState.selectedCardIndex == cardIndex) {
                         localState.selectedCardIndex = null;
 

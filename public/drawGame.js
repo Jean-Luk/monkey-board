@@ -9,7 +9,6 @@ export default function drawGame (ctx, game, canvas, players) {
     const boardMarginX = canvas.width/2 - (board.width*board.tileSize) / 2;
     const boardMarginY = canvas.height/2 - (board.height*board.tileSize) / 2;
 
-
     ctx.font = '16px Arial';
 
     for (let y=0; y < board.tiles.length; y++) {
@@ -56,36 +55,37 @@ export default function drawGame (ctx, game, canvas, players) {
 
     // Draw cards
     for (const playerIndex in game.state.players) {
-
+        
         const cards = game.state.players[playerIndex].cards
+        const spaceBetweenCards = board.width*board.tileSize/(cards.length)
 
         for (let cardIndex in cards) {
             const colors = generateCardImage(game.state.allCards[cards[cardIndex]])
+        
+            const baseX = boardMarginX + (cardIndex * spaceBetweenCards) +  spaceBetweenCards/2 - 25;
+            const baseY = playerIndex == myIndex ? (boardMarginY + board.height*board.tileSize + 42 ) : boardMarginY - 92;
+            
+            // Cards borders
+            ctx.strokeStyle = playerIndex == myIndex ? 'black' : 'red';
+            ctx.fillStyle = playerIndex == myIndex ? 'rgb(0, 0, 0)' : 'rgb(255, 0, 0)';
+            ctx.fillRect(baseX-1, baseY-1, 52, 52);
 
-            const baseX = canvas.width / 2 + 120 * (cardIndex - 1);
-            const baseY = playerIndex == myIndex ? (canvas.height - 160) : 0;
-
+            
             for(let y=0; y<5; y++) {
                 for (let x=0; x<5; x++) {
                     ctx.fillStyle = colors[y][x];
 
 
-                    const offSetX = playerIndex == myIndex ? -25 + x * 10 : 15 - x * 10;
-                    const offSetY = playerIndex == myIndex ? 80 + y * 10 : 120 - y * 10;
+                    const offSetX = playerIndex == myIndex ? x * 10 : 40 - x * 10;
+                    const offSetY = playerIndex == myIndex ? y * 10 : 40 - y * 10;
 
                     ctx.fillRect(baseX + offSetX, baseY + offSetY, 10, 10);
                 }
             }
 
-            ctx.strokeStyle = playerIndex == myIndex ? 'black' : 'red';
-            ctx.fillStyle = playerIndex == myIndex ? 'rgba(0, 0, 0, 0)' : 'rgba(255, 0, 0, 0)';
-
-            ctx.strokeRect(baseX-25, baseY+80, 50, 50);
-            ctx.fillRect(baseX-25, baseY+80, 50, 50);
-
             if (game.localState.selectedCardIndex && cardIndex == game.localState.selectedCardIndex && playerIndex == myIndex) {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.fillRect(baseX-25, (canvas.height-160)+80, 50, 50);
+                ctx.fillRect(baseX, boardMarginY + board.height*board.tileSize + 42 , 50, 50);
             }
 
         }
@@ -97,15 +97,15 @@ export default function drawGame (ctx, game, canvas, players) {
         const card = game.state.allCards[game.state.players[playerIndex].cardQueue[game.state.players[playerIndex].cardQueuePosition]];
         const colors = generateCardImage(card);
 
-        const baseX = canvas.width / 2 - 250;
-        const baseY = playerIndex == myIndex ? (canvas.height - 160) : 0;
+        const baseX = boardMarginX - 51;
+        const baseY = playerIndex == myIndex ? (boardMarginY + board.height*board.tileSize + 52) : boardMarginY - 82;
 
         for(let y=0; y<5; y++) {
             for (let x=0; x<5; x++) {
                 ctx.fillStyle = colors[y][x];
 
-                const offSetX = playerIndex == myIndex ? -25 + x * 7 : 15 - x * 7;
-                const offSetY = playerIndex == myIndex ? 80 + y * 7 : 120 - y * 7;
+                const offSetX = playerIndex == myIndex ? x * 7 : 28 - x * 7;
+                const offSetY = playerIndex == myIndex ? y * 7 : 28 - y * 7;
 
                 ctx.fillRect(baseX + offSetX, baseY + offSetY, 7, 7);
                     
@@ -132,11 +132,18 @@ export default function drawGame (ctx, game, canvas, players) {
 
     // *** TODO: Receber array players através do objeto game (ou incluir os nicknames no objeto state)
     ctx.font = "30px arial";
-    ctx.fillStyle = myIndex == game.state.currentPlayer ? "Red" : "Black";
-    ctx.fillText(players[myIndex].nickname, 320, 515);
+    ctx.fillStyle = 'black'
+    ctx.fillText(players[myIndex].nickname, boardMarginX, boardMarginY + board.tileSize * board.height + 26);
+    ctx.fillText(players[oponentIndex].nickname, boardMarginX, boardMarginY - 4);
 
-    ctx.fillStyle = oponentIndex == game.state.currentPlayer ? "Red" : "Black";
-    ctx.fillText(players[oponentIndex].nickname, 320, 215);
+    ctx.fillStyle = 'green';
+    if (myIndex == game.state.currentPlayer) {
+        ctx.fillRect(boardMarginX - 20, boardMarginY + board.tileSize * board.height + 10, 16, 16)
+    } else {
+        ctx.fillRect(boardMarginX - 20, boardMarginY - 22, 16, 16)
+
+    }
+
 }
 
 function generateCardImage (card) {

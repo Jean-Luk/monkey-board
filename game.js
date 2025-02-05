@@ -64,7 +64,8 @@ function createNewGame (config, playersIds) {
         winner:null,
         currentPlayer:0,
         board: createBoard(config),
-        allCards
+        allCards,
+        config
     }
 
     drawCards(state, config);

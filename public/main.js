@@ -53,10 +53,10 @@ interfaceManager.subscribe((command) => {
 drawManager.draw(ctx, mainInfo, game, canvas);
 
 const path = window.location.pathname;
-// Join room by invite link:
 interfaceManager.closeAllMenus();
 interfaceManager.openMainMenu();
 
+// Join room by invite link:
 if (path.substring(0,5) == "/join") {
     const keyMatch = path.match(/join=(.*)/);
 

@@ -40,11 +40,13 @@ network.subscribe((command) => {
 
 game.subscribe((command) => {
     network.gameUpdate(command);
+    interfaceManager.gameUpdate(command);
 })
 
 interfaceManager.subscribe((command) => {
     if (command.event == "buttonQuitGameClicked") {
         mainInfo.inGame = false;
+        mouseListener.unsubscribe(game.gameClick)
     }
 
     roomManager.inputUpdate(command, network);

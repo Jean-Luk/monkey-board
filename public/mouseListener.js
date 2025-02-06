@@ -8,7 +8,7 @@ export default function createMouseListener () {
     }
 
     function unsubscribe (observerFunction) {
-        state.observers.slice(state.observers.indexOf(observerFunction), 1);
+        state.observers.splice(state.observers.indexOf(observerFunction), 1);
     }
 
     function notifyAll (command) {

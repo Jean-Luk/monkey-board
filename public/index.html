@@ -54,10 +54,15 @@
                 <input type="button" value="Leave Room" id="button_leave_room">
                 <input type="button" value="Start Game" id="button_start_game">
             </div>
-            <div id="end-game-screen">
+            <div id="end-game-screen" class="popup">
                 Winner: <b><span id="winner-end-screen"></span></b><br/><br/>
                     
-                <input type="button" value="Quit" id="button_quit_game">
+                <input type="button" value="Quit" class="buttons_quit_match">
+            </div>
+            <div id="opponent-left-game-screen" class="popup">
+                Your opponent left the game<br/><br/>
+                    
+                <input type="button" value="Quit" class="buttons_quit_match">
             </div>
         </div>
         <canvas id="canvas"></canvas>

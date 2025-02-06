@@ -151,12 +151,14 @@ export default function createInterfaceManager () {
 
     // IN GAME -----
 
-    findInputById("button_quit_game").addEventListener("click", () => {
-        const command = {
-            event:"buttonQuitGameClicked"
-        }
+    findInputsByClass("buttons_quit_match").forEach((input) => {
+        input.addEventListener("click", () => {
+            const command = {
+                event:"buttonQuitGameClicked"
+            }
         notifyAll(command);
-    })
+        }
+    )})
 
     // OTHERS ------
     
@@ -167,6 +169,18 @@ export default function createInterfaceManager () {
 
     // UPDATES ------
     
+    function gameUpdate (command) {
+
+        const updates = {};
+
+        updates["opponentLeft"] = function () {
+            document.getElementById("menus").style.display = 'flex';
+            showOpponentLeftScreen();
+        }
+
+        if (updates[command.event]) updates[command.event](command);
+    }
+
     function networkUpdate (command) {
         const updates = {};
 
@@ -285,13 +299,18 @@ export default function createInterfaceManager () {
 
         info.currentInterface = "end-game";
     }
+
+    function showOpponentLeftScreen () {
+        closeAllMenus();
+
+        findMenuById('opponent-left-game-screen').style.display = "block";
+
+        info.currentInterface = "opponent-left-end-game";
+    }
     
     function updatePlayerList (room, myId) {
         let playerListText = "";
         let spectatorListText = "";
-
-        console.log(room.players);
-        console.log(myId);
 
         for (const player of room.players) {
             const playerText = player.id == myId ? `<b>${player.nickname}</b><br/>` : `${player.nickname}<br />`;
@@ -320,6 +339,6 @@ export default function createInterfaceManager () {
     return {
         info, subscribe,
         closeAllMenus, openMainMenu, openGameLobby, openNicknameMenu,
-        updatePlayerList, networkUpdate, 
+        updatePlayerList, networkUpdate, gameUpdate 
     }
 }

@@ -125,7 +125,7 @@ const { match } = require('assert');
             rooms[roomIndex].inGame = true;
             rooms[roomIndex].game.state = game.createNewGame(null, playersIds);
 
-            console.log(`> Novo jogo criado na sala ${rooms[roomIndex].key}`)
+            console.log(`> New game created on room ${rooms[roomIndex].key}`)
             io.emit("_server_gameStarted", rooms[roomIndex]);
         })
 
@@ -294,6 +294,8 @@ function playerLeft (client, rooms, io) {
     const playerIndex = findPlayerOnRoom(client.id, room.players);
     if (playerIndex === false) return; // !!! TODO Player not found on room list;
 
+    const wasPlayer = !room.players[playerIndex].spectator;
+
     room.players.splice(playerIndex, 1);
     client.currentRoomKey = null;
 
@@ -310,9 +312,7 @@ function playerLeft (client, rooms, io) {
 
     }
     
-    
-    
-    io.emit('_server_playerLeftRoom', room, client.id);
+    io.emit('_server_playerLeftRoom', room, client.id, wasPlayer);
 }
 
 

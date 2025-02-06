@@ -80,7 +80,7 @@ export default function createNetwork () {
         notifyAll({event:"gameStarted", state:room.game.state, players:room.players})
     });
 
-    socket.on('_server_playerLeftRoom', (room, playerId) => {
+    socket.on('_server_playerLeftRoom', (room, playerId, wasPlayer) => {
         if (room.key != status.currentRoom.key) return;
         
         status.currentRoom = room;
@@ -88,7 +88,7 @@ export default function createNetwork () {
         if (playerId == status.myId) { // You left the current room
             notifyAll({event:"leftRoom", room})
         } else { // Someone left your current room
-            notifyAll({event:"playerLeftRoom", room, myId:status.myId})
+            notifyAll({event:"playerLeftRoom", room, myId:status.myId, wasPlayer})
         }
 
     })

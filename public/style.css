@@ -43,7 +43,7 @@ input[type="button"] {
     left: 0;
     z-index: 1;
 }
-#end-game-screen {
+.popup {
     padding: 16px;
     background-color: white;
 }

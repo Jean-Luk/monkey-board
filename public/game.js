@@ -85,17 +85,22 @@ export default function createState (canvas) {
     function networkUpdate (command) {
         const updates = {};
 
-        updates["gameStarted"] = function () {
+        updates["gameStarted"] = function (command) {
             resetState("online", command.state);
         }
-        updates["playerExecutedAction"] = function () {
+        updates["playerExecutedAction"] = function (command) {
             updateState(command.state);
         }
-        updates["playerWonGame"] = function () {
+        updates["playerWonGame"] = function (command) {
             updateState(command.state);
         }
-        
-        if (updates[command.event]) updates[command.event]();
+        updates["playerLeftRoom"] = function (command) {
+            if (command.wasPlayer && command.room.inGame) {
+                notifyAll({event:"opponentLeft"})
+            }
+
+        }
+        if (updates[command.event]) updates[command.event](command);
     }
     
     function updateState (newState) {

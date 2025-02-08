@@ -1,10 +1,10 @@
-export default function drawGame (ctx, game, canvas, players) {
-    const myIndex = game.localState.playerIndex;
+export default function drawGame (ctx, gameInfo, canvas, players) {
+    const myIndex = gameInfo.localState.playerIndex;
     const oponentIndex = myIndex == 0 ? 1 : 0;
 
     // Draw board and objects/troops:
 
-    const board = game.state.board;
+    const board = gameInfo.state.board;
     
     const boardMarginX = canvas.width/2 - (board.width*board.tileSize) / 2;
     const boardMarginY = canvas.height/2 - (board.height*board.tileSize) / 2;
@@ -28,8 +28,8 @@ export default function drawGame (ctx, game, canvas, players) {
             if (board.tiles[tileY][tileX].occupied) {
 
                 const objectID = board.tiles[tileY][tileX].object.id
-                if (game.objects[objectID]) {
-                    game.objects[objectID].draw(ctx, offSetX + (board.tileSize/2 - 12), offSetY + (board.tileSize/2 - 12), board);
+                if (gameInfo.objects[objectID]) {
+                    gameInfo.objects[objectID].draw(ctx, offSetX + (board.tileSize/2 - 12), offSetY + (board.tileSize/2 - 12), board);
                 }
                 if (board.tiles[tileY][tileX].object.team != myIndex) {
                     ctx.fillStyle = "rgba(255,0,0,0.3)";
@@ -41,10 +41,10 @@ export default function drawGame (ctx, game, canvas, players) {
     }
     
     // Draw selection
-    if(game.localState.selectedTile.x != null) {
+    if(gameInfo.localState.selectedTile.x != null) {
 
-        const tileY = myIndex == 1 ? game.localState.selectedTile.y : board.height - game.localState.selectedTile.y-1;
-        const tileX = myIndex == 1 ? game.localState.selectedTile.x : board.width - game.localState.selectedTile.x-1;
+        const tileY = myIndex == 1 ? gameInfo.localState.selectedTile.y : board.height - gameInfo.localState.selectedTile.y-1;
+        const tileX = myIndex == 1 ? gameInfo.localState.selectedTile.x : board.width - gameInfo.localState.selectedTile.x-1;
 
         const offSetX = boardMarginX + tileX * board.tileSize;
         const offSetY = boardMarginY + tileY * board.tileSize;
@@ -54,13 +54,13 @@ export default function drawGame (ctx, game, canvas, players) {
     }
 
     // Draw cards
-    for (const playerIndex in game.state.players) {
+    for (const playerIndex in gameInfo.state.players) {
         
-        const cards = game.state.players[playerIndex].cards
+        const cards = gameInfo.state.players[playerIndex].cards
         const spaceBetweenCards = board.width*board.tileSize/(cards.length)
 
         for (let cardIndex in cards) {
-            const colors = generateCardImage(game.state.allCards[cards[cardIndex]])
+            const colors = generateCardImage(gameInfo.state.allCards[cards[cardIndex]])
         
             const baseX = boardMarginX + (cardIndex * spaceBetweenCards) +  spaceBetweenCards/2 - 25;
             const baseY = playerIndex == myIndex ? (boardMarginY + board.height*board.tileSize + 42 ) : boardMarginY - 92;
@@ -83,7 +83,7 @@ export default function drawGame (ctx, game, canvas, players) {
                 }
             }
 
-            if (game.localState.selectedCardIndex && cardIndex == game.localState.selectedCardIndex && playerIndex == myIndex) {
+            if (gameInfo.localState.selectedCardIndex && cardIndex == gameInfo.localState.selectedCardIndex && playerIndex == myIndex) {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
                 ctx.fillRect(baseX, boardMarginY + board.height*board.tileSize + 42 , 50, 50);
             }
@@ -92,9 +92,9 @@ export default function drawGame (ctx, game, canvas, players) {
     }
 
     // Draw next cards
-    for (const playerIndex in game.state.players) {
+    for (const playerIndex in gameInfo.state.players) {
 
-        const card = game.state.allCards[game.state.players[playerIndex].cardQueue[game.state.players[playerIndex].cardQueuePosition]];
+        const card = gameInfo.state.allCards[gameInfo.state.players[playerIndex].cardQueue[gameInfo.state.players[playerIndex].cardQueuePosition]];
         const colors = generateCardImage(card);
 
         const baseX = boardMarginX - 51;
@@ -115,7 +115,7 @@ export default function drawGame (ctx, game, canvas, players) {
 
     // Draw possible moves
 
-    for (const move of game.localState.possibleMoves) {
+    for (const move of gameInfo.localState.possibleMoves) {
 
         const tileY = myIndex == 1 ? move.y : board.height - move.y-1;
         const tileX = myIndex == 1 ? move.x : board.width - move.x-1;
@@ -130,18 +130,16 @@ export default function drawGame (ctx, game, canvas, players) {
 
     // Draw interface
 
-    // *** TODO: Receber array players através do objeto game (ou incluir os nicknames no objeto state)
     ctx.font = "30px arial";
     ctx.fillStyle = 'black'
     ctx.fillText(players[myIndex].nickname, boardMarginX, boardMarginY + board.tileSize * board.height + 26);
     ctx.fillText(players[oponentIndex].nickname, boardMarginX, boardMarginY - 4);
 
     ctx.fillStyle = 'green';
-    if (myIndex == game.state.currentPlayer) {
+    if (myIndex == gameInfo.state.currentPlayer) {
         ctx.fillRect(boardMarginX - 20, boardMarginY + board.tileSize * board.height + 10, 16, 16)
     } else {
         ctx.fillRect(boardMarginX - 20, boardMarginY - 22, 16, 16)
-
     }
 
 }

@@ -3,7 +3,7 @@ export default function createNetwork () {
     const socket = io();
 
     const status = {
-        myId:null, currentRoom:{gameStatus:null}
+        myId:null, currentRoom:{}
     }
 
     const observers = [];
@@ -37,15 +37,13 @@ export default function createNetwork () {
     socket.on('playerId', (receivedId) => {
         status.myId = receivedId;
 
-        notifyAll({event:"receivedPlayerId", receivedId});
-        
+        notifyAll({event:"receivedPlayerId", receivedId});        
     });
 
     socket.on('server_createdRoom', (room) => {
         status.currentRoom = room;
 
         notifyAll({event:"createdRoom", room, myId:status.myId})
-        
     });
 
     socket.on('server_enteredQueue', (nickname) => {
@@ -72,7 +70,7 @@ export default function createNetwork () {
         }
     });
 
-    socket.on('_server_createdMatch', (room, players) => {
+    socket.on('_server_createdMatch', (room, players) => { // Started match from queue
         if (!(players.includes(status.myId))) return;
         status.currentRoom = room;
 
@@ -93,7 +91,7 @@ export default function createNetwork () {
 
     })
 
-    socket.on('_server_gameStarted', (room) => {
+    socket.on('_server_gameStarted', (room) => { // Game on current room started
         if (status.currentRoom && room.key != status.currentRoom.key) return;
 
         status.currentRoom = room;
@@ -107,6 +105,7 @@ export default function createNetwork () {
 
         notifyAll({event:"playerExecutedAction", state:room.game.state});
     })
+
     socket.on('_server_playerWonGame', (room) => {
         if (status.currentRoom && room.key != status.currentRoom.key) return;
         
@@ -127,8 +126,8 @@ export default function createNetwork () {
         notifyAll({event:"joinedRoom", room, myId:status.myId});
     })
     return {
-        inputUpdate, getCurrentRoom, gameUpdate,
-        status, socket, subscribe,
+        inputUpdate, getCurrentRoom, gameUpdate, subscribe,
+        socket,
     }
 }
 

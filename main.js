@@ -23,6 +23,13 @@ const { match } = require('assert');
     const matchQueue = [];
 
 
+    /*
+    Legend:
+    _server_... -> Server emit globally
+    server_... -> Server emit locally
+    client_... -> Received from client
+    */
+
     io.on('connection', function(socket) {
         // Send client Id once conected
         socket.emit('playerId', socket.id);

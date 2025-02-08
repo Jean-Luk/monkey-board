@@ -52,7 +52,7 @@ interfaceManager.subscribe((command) => {
     roomManager.inputUpdate(command, network);
 })
 
-drawManager.draw(ctx, mainInfo, game, canvas);
+drawManager.draw(ctx, mainInfo, game.getGameInfo(), canvas);
 
 const path = window.location.pathname;
 interfaceManager.closeAllMenus();

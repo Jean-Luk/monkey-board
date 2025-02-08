@@ -47,3 +47,8 @@ input[type="button"] {
     padding: 16px;
     background-color: white;
 }
+
+.left {
+    position: absolute;
+    left: 0;
+}

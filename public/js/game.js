@@ -1,3 +1,5 @@
+import objects from "./objects.js";
+
 export default function createState (canvas) {
 
     let boardMarginX;
@@ -14,61 +16,6 @@ export default function createState (canvas) {
             observerFunction(command)
         }
     }
-
-    const objects = [
-        {
-            name:'King', 
-            draw:function(ctx,x,y) {
-                ctx.fillStyle = 'black'
-                ctx.fillText("King", x-5, y-4);
-                ctx.fillStyle = 'yellow'
-                ctx.fillText("King", x-4, y-5);
-                ctx.fillRect(x, y, 25, 25);
-            },
-            movable:true,
-            killable:true,
-            action:moveObject,
-        },
-        {
-            name:'Archer', 
-            draw:function(ctx,x,y) {
-                ctx.fillStyle = 'black'
-                ctx.fillText("Archer", x-11, y-4);
-                ctx.fillStyle = 'green';
-                ctx.fillRect(x, y, 25, 25);
-                ctx.fillText("Archer", x-10, y-5);
-            },
-            movable:true,
-            killable:true,
-            action:moveOrKillObject,
-        },
-        {
-            name:'Guard', 
-            draw:function(ctx,x,y) {
-                ctx.fillStyle = 'black'
-                ctx.fillText("Guard", x-11, y-4);
-                ctx.fillStyle = 'brown';
-                ctx.fillText("Guard", x-10, y-5);
-                ctx.fillRect(x, y, 25, 25);
-            },
-            movable:true,
-            killable:false,
-            action:moveObject
-        },
-        {
-            name:'Warrior', 
-            draw:function(ctx,x,y) {
-                ctx.fillStyle = 'black'
-                ctx.fillText("Warrior", x-15, y-4);
-                ctx.fillStyle = 'red';
-                ctx.fillText("Warrior", x-14, y-5);
-                ctx.fillRect(x, y, 25, 25);
-            },
-            movable:true,
-            killable:true,
-            action:moveObjectAndKill
-        }
-    ]
 
     const localState = {
         selectedTile:{
@@ -233,8 +180,8 @@ export default function createState (canvas) {
             return;
         }
         
-        const command = {objectTile, coords}
-        const action = objects[objectId].action(command)
+        const command = {objectTile, coords};
+        const action = objects[objectId].action(command, state, objects);
     
         if (!action) { // If the object has no action, cancel;
             return;
@@ -243,45 +190,6 @@ export default function createState (canvas) {
         notifyAll({event:"executeAction", localState, targetCoords:coords})
     }
 
-    function moveObject (command) {
-        const coords = command.coords
-
-        const targetTile = state.board.tiles[coords.y][coords.x]
-
-        if (targetTile.occupied) return false;
-    
-        return true;
-    }
-    
-    function moveObjectAndKill (command) {
-        const objectTile = command.objectTile;
-        const coords = command.coords
-
-        const targetTile = state.board.tiles[coords.y][coords.x]
-        
-        if (targetTile.occupied) {
-            if (!(objects[targetTile.object.id].killable) || targetTile.object.team == objectTile.object.team) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    
-    function moveOrKillObject (command) {
-        const objectTile = command.objectTile;
-        const coords = command.coords
-
-        const targetTile = state.board.tiles[coords.y][coords.x]
-
-        if (targetTile.occupied) {
-            if (!(objects[targetTile.object.id].killable) || targetTile.object.team == objectTile.object.team) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
     
     function updatePossibleMoves () { 
         localState.possibleMoves = []
@@ -316,10 +224,13 @@ export default function createState (canvas) {
         }
     }
     
+    function getGameInfo () {
+        return { localState, state, objects };
+    }
 
     return {
         subscribe,
         objects, localState, state,
-        networkUpdate, gameClick,
+        networkUpdate, gameClick, getGameInfo,
     }
 }

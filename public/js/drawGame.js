@@ -1,4 +1,4 @@
-export default function drawGame (ctx, gameInfo, canvas, players) {
+export default function drawGame (ctx, gameInfo, canvas) {
     const myIndex = gameInfo.localState.playerIndex;
     const oponentIndex = myIndex == 0 ? 1 : 0;
 
@@ -132,8 +132,9 @@ export default function drawGame (ctx, gameInfo, canvas, players) {
 
     ctx.font = "30px arial";
     ctx.fillStyle = 'black'
-    ctx.fillText(players[myIndex].nickname, boardMarginX, boardMarginY + board.tileSize * board.height + 26);
-    ctx.fillText(players[oponentIndex].nickname, boardMarginX, boardMarginY - 4);
+
+    ctx.fillText(gameInfo.state.players[myIndex].nickname, boardMarginX, boardMarginY + board.tileSize * board.height + 26);
+    ctx.fillText(gameInfo.state.players[oponentIndex].nickname, boardMarginX, boardMarginY - 4);
 
     ctx.fillStyle = 'green';
     if (myIndex == gameInfo.state.currentPlayer) {

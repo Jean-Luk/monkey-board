@@ -34,7 +34,6 @@ network.subscribe((command) => {
     }
     interfaceManager.networkUpdate(command)
     game.networkUpdate(command);
-    drawManager.networkUpdate(command);
 
 });
 

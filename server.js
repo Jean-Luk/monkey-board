@@ -119,18 +119,23 @@ const { match } = require('assert');
             if (!clients[clientIndex].currentRoomKey) return socket.emit("server_error_startGame", "Try reloading the page."); // Not in a room
             
             const roomIndex = findRoomByKey(clients[clientIndex].currentRoomKey, rooms);
+
             if (roomIndex === false) return socket.emit("server_error_startGame", "Try reloading the page.");; // !!! TODO
 
-            if (socket.id != rooms[roomIndex].owner) return socket.emit("server_error_startGame", "You are not the owner."); // !!! TODO not the owner
+            const room = rooms[roomIndex];
+            const players = room.players;
 
-            if (rooms[roomIndex].players.length < 2) return socket.emit("server_error_startGame", "Not enough players in the room.");// !!! TODO Not enough players
+            if (socket.id != room.owner) return socket.emit("server_error_startGame", "You are not the owner."); // !!! TODO not the owner
 
-            if (rooms[roomIndex].inGame) return socket.emit("server_error_startGame", "The room is already in a game.");// !!! TODO already in game
+            if (players.length < 2) return socket.emit("server_error_startGame", "Not enough players in the room.");// !!! TODO Not enough players
+
+            if (room.inGame) return socket.emit("server_error_startGame", "The room is already in a game.");// !!! TODO already in game
             
-            const playersIds = [rooms[roomIndex].players[0].id, rooms[roomIndex].players[1].id];
+            const playersIds = [players[0].id, players[1].id];
+            const playersNicknames = [players[0].nickname, players[1].nickname]
 
             rooms[roomIndex].inGame = true;
-            rooms[roomIndex].game.state = game.createNewGame(null, playersIds);
+            rooms[roomIndex].game.state = game.createNewGame(null, playersIds, playersNicknames);
 
             console.log(`> New game created on room ${rooms[roomIndex].key}`)
             io.emit("_server_gameStarted", rooms[roomIndex]);
@@ -160,10 +165,11 @@ const { match } = require('assert');
                 clients[clientIndex].onQueue = false;
                 clients[otherPlayerIndex].onQueue = false;
                 matchQueue.splice(0, 2);
-                
 
+                const playersNicknames = [clients[otherPlayerIndex].nickname, clients[clientIndex].nickname];
+                
                 const newRoom = createRoom(rooms, clients[otherPlayerIndex], clients[clientIndex], true, true);
-                newRoom.game.state = game.createNewGame(null, playersIds);
+                newRoom.game.state = game.createNewGame(null, playersIds, playersNicknames);
 
                 io.emit('_server_createdMatch', newRoom, playersIds);
             }

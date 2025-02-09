@@ -2,26 +2,18 @@ import drawGame from "./drawGame.js";
 
 export default function requestDraw () {
     
-    let players = [];
-
-    function networkUpdate (command) {
-        if (command.event == "gameStarted") {
-            players = command.players
-        }
-    }
-
-    function draw (ctx, mainInfo, gameInfo, canvas) {
+    function draw (ctx, mainInfo, gameState, canvas) {
         ctx.clearRect(0,0,canvas.width,canvas.height)
 
         if (mainInfo.inGame) {
-            drawGame(ctx, gameInfo, canvas, players);
+            drawGame(ctx, gameState, canvas);
         }
 
         requestAnimationFrame(() => {
-            draw(ctx, mainInfo, gameInfo, canvas);
+            draw(ctx, mainInfo, gameState, canvas);
         });
 
     }
 
-    return {draw, networkUpdate};
+    return {draw};
 }

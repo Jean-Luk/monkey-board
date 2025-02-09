@@ -6,7 +6,7 @@ const io = require('socket.io')(http);
 
 const port = 8080;
 
-const game = require('./game');
+const game = require('./game/game.js');
 const { match } = require('assert');
 
 (async function main () {

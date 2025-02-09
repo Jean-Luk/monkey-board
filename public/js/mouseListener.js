@@ -1,18 +1,19 @@
 export default function createMouseListener () {
-    const state = {
-        observers: []
-    }
+
+    const observers = []
 
     function subscribe (observerFunction) {
-        state.observers.push(observerFunction)
+        if (observers.indexOf(observerFunction) === -1) { // Prevents the same observer from being added twice
+            observers.push(observerFunction)
+        }
     }
 
     function unsubscribe (observerFunction) {
-        state.observers.splice(state.observers.indexOf(observerFunction), 1);
+        observers.splice(observers.indexOf(observerFunction), 1);
     }
 
     function notifyAll (command) {
-        for (const observerFunction of state.observers) {
+        for (const observerFunction of observers) {
             observerFunction(command)
         }
     }

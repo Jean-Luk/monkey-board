@@ -31,27 +31,7 @@ const objects = [
     }
 ]
 
-const allCards = [
-    [[0,-2],[0,2]],
-    [[1,-2], [-1,-2],[0,1]],
-    [[0,-2], [0,-1]],
-    [[1,-1], [-1,-1],[0,1]],
-    [[1,-2], [2,-1]],
-    [[-1,-2], [-2,-1],[0,1]],
-    [[-2,0],[2,0],[0,1]],
-    [[0,1],[-1,1],[1,1]],
-    [[0,2],[-1,1],[1,1]],
-    [[-1,2],[1,2]],
-
-    // [[1,-1],[-1,-1]],
-    // [[2,-1],[-2,-1]],
-    // [[1,-2],[-1,-2]],
-    // [[1,1],[-1,-1]],
-    // [[1,1],[-1,-1]],
-    // [[0,2],[1,2],[-1,2]],
-    // [[-1,0],[-2,0]],
-    // [[1,0],[2,0]]
-]
+const allCards = require("./cards.js");
 
 function createNewGame (config, playersIds) {
     config = config ? config : defaultConfig;
@@ -187,25 +167,26 @@ function performAction (state, localState) {
     
 }
 
-// TODO -> switch state to board on functions params
 function moveObject (state, selectedTileCoords, targetTileCoords) {
 
-    const targetTile = state.board.tiles[targetTileCoords.y][targetTileCoords.x]
+    const board = state.board
+    const targetTile = board.tiles[targetTileCoords.y][targetTileCoords.x]
 
     if (targetTile.occupied) return false;
 
-    const selectedTile = state.board.tiles[selectedTileCoords.y][selectedTileCoords.x];
+    const selectedTile = board.tiles[selectedTileCoords.y][selectedTileCoords.x];
 
-    state.board.tiles[targetTileCoords.y][targetTileCoords.x] = { ...selectedTile }
-    state.board.tiles[selectedTileCoords.y][selectedTileCoords.x] = {occupied:false, object:null}
+    board.tiles[targetTileCoords.y][targetTileCoords.x] = { ...selectedTile }
+    board.tiles[selectedTileCoords.y][selectedTileCoords.x] = {occupied:false, object:null}
 
     return true;
 }
 
 function moveObjectAndKill (state, selectedTileCoords, targetTileCoords) {
     
-    const selectedTile = state.board.tiles[selectedTileCoords.y][selectedTileCoords.x];
-    const targetTile = state.board.tiles[targetTileCoords.y][targetTileCoords.x]
+    const board = state.board
+    const selectedTile = board.tiles[selectedTileCoords.y][selectedTileCoords.x];
+    const targetTile = board.tiles[targetTileCoords.y][targetTileCoords.x]
     
     let killedTile = null;
     if (targetTile.occupied) {
@@ -216,8 +197,8 @@ function moveObjectAndKill (state, selectedTileCoords, targetTileCoords) {
         }
     }
 
-    state.board.tiles[targetTileCoords.y][targetTileCoords.x] = { ...selectedTile };
-    state.board.tiles[selectedTileCoords.y][selectedTileCoords.x] = {occupied:false, object:null};
+    board.tiles[targetTileCoords.y][targetTileCoords.x] = { ...selectedTile };
+    board.tiles[selectedTileCoords.y][selectedTileCoords.x] = {occupied:false, object:null};
 
     killedObject(state, killedTile)
 
@@ -226,8 +207,9 @@ function moveObjectAndKill (state, selectedTileCoords, targetTileCoords) {
 
 function moveOrKillObject (state, selectedTileCoords, targetTileCoords) {
 
-    const targetTile = state.board.tiles[targetTileCoords.y][targetTileCoords.x]
-    const selectedTile = state.board.tiles[selectedTileCoords.y][selectedTileCoords.x];
+    const board = state.board
+    const targetTile = board.tiles[targetTileCoords.y][targetTileCoords.x]
+    const selectedTile = board.tiles[selectedTileCoords.y][selectedTileCoords.x];
 
     let killedTile = null;
     if (targetTile.occupied) {
@@ -237,12 +219,12 @@ function moveOrKillObject (state, selectedTileCoords, targetTileCoords) {
             killedTile = {id:targetTile.object.id, team:targetTile.object.team}
         }
 
-        state.board.tiles[targetTileCoords.y][targetTileCoords.x] = {occupied:false, object:null}    
+        board.tiles[targetTileCoords.y][targetTileCoords.x] = {occupied:false, object:null}    
         killedObject(state, killedTile);
 
     } else {
-        state.board.tiles[targetTileCoords.y][targetTileCoords.x] = { ...selectedTile }
-        state.board.tiles[selectedTileCoords.y][selectedTileCoords.x] = {occupied:false, object:null}    
+        board.tiles[targetTileCoords.y][targetTileCoords.x] = { ...selectedTile }
+        board.tiles[selectedTileCoords.y][selectedTileCoords.x] = {occupied:false, object:null}    
         
     }
 
@@ -266,7 +248,4 @@ function finishGame (state, winner) {
 
 module.exports = {
     createNewGame, executeAction
-    // Add Card to queue
-    // 
-
 }

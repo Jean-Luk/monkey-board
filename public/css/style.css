@@ -46,6 +46,11 @@ input[type="button"] {
 .popup {
     padding: 16px;
     background-color: white;
+    position: absolute;
+    left: auto;
+    top: auto;
+    border: 2px solid black;
+    border-radius: 4px;
 }
 
 .left {

@@ -125,6 +125,11 @@ export default function createNetwork () {
     socket.on("server_wentBackToLobby", (room) => {
         notifyAll({event:"joinedRoom", room, myId:status.myId});
     })
+
+    socket.on("server_error_startGame", (message) => {
+        notifyAll({event:"errorStartingGame", message});
+    })
+    
     return {
         inputUpdate, getCurrentRoom, gameUpdate, subscribe,
         socket,

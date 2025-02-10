@@ -230,6 +230,9 @@ export default function createInterfaceManager () {
         updates["backToLobby"] = function (command) {
             openGameLobby(command.room, command.myId);
         }
+        updates["errorStartingGame"] = function (command) {
+            showPopUp("Error", command.message);
+        }
 
         if (updates[command.event]) updates[command.event](command);
 
@@ -334,6 +337,29 @@ export default function createInterfaceManager () {
         textArea.select();
         document.execCommand("copy");
         document.body.removeChild(textArea);
+    }
+    function showPopUp (title, message) {
+        const popUpDiv = document.createElement("div");
+        popUpDiv.id = `${title}_div`;
+        popUpDiv.classList.add("popup");
+
+        popUpDiv.innerHTML = `
+            <b>${title}</b><br/><br/>
+            ${message}<br/><br/>
+        `;
+
+        const okButton = document.createElement("input");
+        okButton.value = "Ok";
+        okButton.type = "button";
+
+        popUpDiv.appendChild(okButton)
+
+        okButton.addEventListener("click", () => {
+            menus.removeChild(document.getElementById(`${title}_div`))
+        })
+
+        menus.appendChild(popUpDiv);
+
     }
     
     return {

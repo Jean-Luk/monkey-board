@@ -31,7 +31,7 @@ export default function createState (canvas) {
     }
 
     function interfaceUpdate (command) {
-        updates = {};
+        const updates = {};
 
         updates["buttonQuitGameClicked"] = function () {
             localState.inGame = false;

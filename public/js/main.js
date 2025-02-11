@@ -49,6 +49,7 @@ interfaceManager.subscribe((command) => {
     }
 
     roomManager.inputUpdate(command, network);
+    game.interfaceUpdate(command);
 })
 
 drawManager.draw(ctx, mainInfo, game.getGameInfo(), canvas);

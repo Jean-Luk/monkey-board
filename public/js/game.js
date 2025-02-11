@@ -23,12 +23,23 @@ export default function createState (canvas) {
         },
         selectedCardIndex: null,
         possibleMoves: [],
-        playerIndex:null // TODO: identify what is my index based on the state received from the server
+        playerIndex:null,
+        inGame:false // If the match is opened
     }
 
     const state = {
     }
-        
+
+    function interfaceUpdate (command) {
+        updates = {};
+
+        updates["buttonQuitGameClicked"] = function () {
+            localState.inGame = false;
+        }
+
+        if (updates[command.event]) updates[command.event](command);
+    }
+
     function networkUpdate (command) {
         const updates = {};
 
@@ -42,7 +53,7 @@ export default function createState (canvas) {
             updateState(command.state);
         }
         updates["playerLeftRoom"] = function (command) {
-            if (command.wasPlayer && command.room.inGame) {
+            if (command.wasPlayer && localState.inGame) {
                 notifyAll({event:"opponentLeft"})
             }
 
@@ -67,7 +78,8 @@ export default function createState (canvas) {
         boardMarginX = canvas.width/2 - (newState.board.width*newState.board.tileSize) / 2
         boardMarginY = canvas.height/2 - (newState.board.height*newState.board.tileSize) / 2
 
-        localState.playerIndex=newState.myIndex
+        localState.playerIndex=newState.myIndex;
+        localState.inGame = true;
 
         if (gameType === "online") {
             updateState(newState);
@@ -231,6 +243,6 @@ export default function createState (canvas) {
     return {
         subscribe,
         objects, localState, state,
-        networkUpdate, gameClick, getGameInfo,
+        networkUpdate, gameClick, getGameInfo, interfaceUpdate
     }
 }

@@ -324,6 +324,10 @@ function playerLeft (client, rooms, io) {
         }
 
     }
+        
+    if (wasPlayer) {
+        room.inGame = false;
+    }
     
     io.emit('_server_playerLeftRoom', room, client.id, wasPlayer);
 }

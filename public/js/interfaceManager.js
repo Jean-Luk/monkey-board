@@ -67,7 +67,7 @@ export default function createInterfaceManager () {
     findInputById("button_join_room_nickname_menu").addEventListener("click", () => {
         const nickname = findInputById("input_nickname_nickname_menu").value
         if(!nickname) {
-            return alert("Invalid nickname.");
+            return showPopUp("Invalid nickname.");
         }
 
         const command = {
@@ -83,7 +83,7 @@ export default function createInterfaceManager () {
     findInputById("button_private_room").addEventListener("click", () => {
         const nickname = findInputById("input_nickname_main_menu").value
         if (!nickname) {
-            return alert("Invalid nickname.");
+            return showPopUp("Invalid nickname.");
         }
 
         openPrivateRoomMenu();
@@ -213,10 +213,13 @@ export default function createInterfaceManager () {
         }
         updates["errorJoiningRoom"] = function (command) {
             if(command.error == "Room not found.") {
+                
                 findInputById("input_room_key").value = "";
                 if(info.currentInterface == "nickname-menu") {
                     openMainMenu();
                 }
+                
+                showPopUp(command.error);
             }
         }
         updates["gameEnded"] = function () {
@@ -315,17 +318,19 @@ export default function createInterfaceManager () {
         let playerListText = "";
         let spectatorListText = "";
 
-        for (const player of room.players) {
-            const playerText = player.id == myId ? `<b>${player.nickname}</b><br/>` : `${player.nickname}<br />`;
+        for (const player of room.members) {
+            let playerText = player.id == room.owner ? `<b>${player.nickname}</b>` : `${player.nickname}`;
+            if (player.id == myId) playerText += " (you)";
+
             if (player.spectator) {
-                spectatorListText += playerText;
+                spectatorListText += playerText + "<br/>";
             } else {
-                playerListText += playerText;
+                playerListText += playerText + "<br/>";
             }
         }
 
         findSpanById('player-list').innerHTML = playerListText;
-        // findSpanById('spectator-list').innerHTML = spectatorListText;
+        findSpanById('spectator-list').innerHTML = spectatorListText;
     }
 
     function copyText (text) {
@@ -338,14 +343,16 @@ export default function createInterfaceManager () {
         document.execCommand("copy");
         document.body.removeChild(textArea);
     }
-    function showPopUp (title, message) {
+    function showPopUp (title, message="") {
         const popUpDiv = document.createElement("div");
         popUpDiv.id = `${title}_div`;
         popUpDiv.classList.add("popup");
 
+        if (message != "") message += "<br/><br/>";
+
         popUpDiv.innerHTML = `
             <b>${title}</b><br/><br/>
-            ${message}<br/><br/>
+            ${message}
         `;
 
         const okButton = document.createElement("input");

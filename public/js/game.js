@@ -24,7 +24,8 @@ export default function createState (canvas) {
         selectedCardIndex: null,
         possibleMoves: [],
         playerIndex:null,
-        inGame:false // If the match is opened
+        inGame:false, // If the match is opened
+        isSpectator:false // If I am a spectator
     }
 
     const state = {
@@ -44,7 +45,7 @@ export default function createState (canvas) {
         const updates = {};
 
         updates["gameStarted"] = function (command) {
-            resetState("online", command.state);
+            resetState("online", command.state, command.myIndex, command.isSpectator);
         }
         updates["playerExecutedAction"] = function (command) {
             updateState(command.state);
@@ -74,12 +75,13 @@ export default function createState (canvas) {
 
     }
 
-    function resetState (gameType, newState=null) {
+    function resetState (gameType, newState=null, myIndex, isSpectator) {
         boardMarginX = canvas.width/2 - (newState.board.width*newState.board.tileSize) / 2
         boardMarginY = canvas.height/2 - (newState.board.height*newState.board.tileSize) / 2
 
-        localState.playerIndex=newState.myIndex;
+        localState.playerIndex=myIndex;
         localState.inGame = true;
+        localState.isSpectator = isSpectator;
 
         if (gameType === "online") {
             updateState(newState);
@@ -93,6 +95,8 @@ export default function createState (canvas) {
     
     function checkIfClickedOnPossibleAction (clickedTile) {
         // Whenever clicks on a tile, check if it contains a possible action
+
+
         for(let tile of localState.possibleMoves) {
             if(clickedTile.x === tile.x && clickedTile.y === tile.y) {
                 return true;
@@ -132,7 +136,7 @@ export default function createState (canvas) {
         
         const clickedOnPossibleAction = checkIfClickedOnPossibleAction(newSelectedTile);
 
-        if (clickedOnPossibleAction) {
+        if (clickedOnPossibleAction && !(localState.isSpectator)) {
             executeAction(newSelectedTile)
             return;
         }
@@ -155,9 +159,6 @@ export default function createState (canvas) {
         
         // Check if clicked in a card
         const cards = state.players[localState.playerIndex].cards
-
-        // const baseX = boardMarginX + (cardIndex * spaceBetweenCards) +  spaceBetweenCards/2 - 25;
-        // const baseY = playerIndex == myIndex ? (boardMarginY + board.height*board.tileSize + 42 ) : boardMarginY - 92;
 
         const spaceBetweenCards = state.board.width*state.board.tileSize/(cards.length)
 

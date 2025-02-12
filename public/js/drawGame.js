@@ -136,6 +136,10 @@ export default function drawGame (ctx, gameInfo, canvas) {
     ctx.fillText(gameInfo.state.players[myIndex].nickname, boardMarginX, boardMarginY + board.tileSize * board.height + 26);
     ctx.fillText(gameInfo.state.players[oponentIndex].nickname, boardMarginX, boardMarginY - 4);
 
+    if (gameInfo.localState.isSpectator) {
+        ctx.fillText("Spectator", boardMarginX, 25);
+    }
+
     ctx.fillStyle = 'green';
     if (myIndex == gameInfo.state.currentPlayer) {
         ctx.fillRect(boardMarginX - 20, boardMarginY + board.tileSize * board.height + 10, 16, 16)

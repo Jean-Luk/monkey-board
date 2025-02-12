@@ -8,6 +8,7 @@ const port = 8080;
 
 const game = require('./game/game.js');
 const { match } = require('assert');
+const { count } = require('console');
 
 (async function main () {
     app.use(express.static(__dirname + '/public'));
@@ -59,22 +60,24 @@ const { match } = require('assert');
             const roomIndex = findRoomByKey (roomKey, rooms);
             if (roomIndex === false) return socket.emit("server_error_joinRoom", "Room not found."); 
 
-            if (clients[clientIndex].currentRoomKey == rooms[roomIndex].key) return;
-            if (rooms[roomIndex].players.length >= 2) return socket.emit("server_error_joinRoom", "The room is full.")
-            if (rooms[roomIndex].private) return socket.emit("This room is private.");
+            const room = rooms[roomIndex];
+
+            if (clients[clientIndex].currentRoomKey == room.key) return;
+            if (room.members.length >= 10) return socket.emit("server_error_joinRoom", "The room is currently full.")
+            if (room.private) return socket.emit("This room is private.");
 
             const newPlayer = {
                 id:socket.id, nickname:clientNickname,
-                spectator: rooms[roomIndex].players.length >= 2 ? true : false, // If room has 2 or more players, set as spectator
+                spectator: (countPlayers(room.members) >= 2) ? true : false, // If room already has 2 players, set as spectator
                 victories:0
             }
 
-            rooms[roomIndex].players.push(newPlayer);
+            room.members.push(newPlayer);
             clients[clientIndex].currentRoomKey = roomKey;
 
-            console.log(`> ${socket.id} joined room ${rooms[roomIndex].key} as ${clientNickname}`)
+            console.log(`> ${socket.id} joined room ${room.key} as ${clientNickname}`)
 
-            io.emit('_server_joinedRoom', rooms[roomIndex], socket.id);
+            io.emit('_server_joinedRoom', room, socket.id);
 
         })
 
@@ -87,10 +90,10 @@ const { match } = require('assert');
             const roomIndex = findRoomByKey(clients[clientIndex].currentRoomKey, rooms);
             if (roomIndex === false) return; // !!! TODO
 
-            const playerIndex = findPlayerOnRoom(socket.id, rooms[roomIndex].players);
+            const playerIndex = findMemberOnRoom(socket.id, rooms[roomIndex].players);
             if (playerIndex === false) return; // !!! TODO Player not found on room list;
 
-            rooms[roomIndex].players[playerIndex].spectator = true;
+            rooms[roomIndex].members[playerIndex].spectator = true;
             io.emit('_server_becameSpectator', rooms[roomIndex]);
         })
         
@@ -103,12 +106,12 @@ const { match } = require('assert');
             const roomIndex = findRoomByKey(clients[clientIndex].currentRoomKey, rooms);
             if (roomIndex === false) return; // !!! TODO
 
-            const playerIndex = findPlayerOnRoom(socket.id, rooms[roomIndex].players);
+            const playerIndex = findMemberOnRoom(socket.id, rooms[roomIndex].members);
             if (playerIndex === false) return; // !!! TODO Player not found on room list;
 
-            if (countPlayers(rooms[roomIndex].players) >= 2) return; // Room already has 2 players;
+            if (countPlayers(rooms[roomIndex].members) >= 2) return; // Room already has 2 players;
 
-            rooms[roomIndex].players[playerIndex].spectator = false;
+            rooms[roomIndex].members[playerIndex].spectator = false;
             io.emit('_server_becamePlayer', rooms[roomIndex]);
         })
 
@@ -120,22 +123,21 @@ const { match } = require('assert');
             
             const roomIndex = findRoomByKey(clients[clientIndex].currentRoomKey, rooms);
 
-            if (roomIndex === false) return socket.emit("server_error_startGame", "Try reloading the page.");; // !!! TODO
+            if (roomIndex === false) return socket.emit("server_error_startGame", "Try reloading the page.");
 
             const room = rooms[roomIndex];
-            const players = room.players;
-
-            if (socket.id != room.owner) return socket.emit("server_error_startGame", "You are not the owner."); // !!! TODO not the owner
-
-            if (players.length < 2) return socket.emit("server_error_startGame", "Not enough players in the room.");// !!! TODO Not enough players
-
-            if (room.inGame) return socket.emit("server_error_startGame", "The room is already in a game.");// !!! TODO already in game
+            const members = room.members;
             
-            const playersIds = [players[0].id, players[1].id];
-            const playersNicknames = [players[0].nickname, players[1].nickname]
+            if (socket.id != room.owner) return socket.emit("server_error_startGame", "You are not the owner.");
+
+            if (countPlayers(members) < 2) return socket.emit("server_error_startGame", "Not enough players in the room.");
+
+            if (room.inGame) return socket.emit("server_error_startGame", "The room is already in a game.");
+            
+            const players = getPlayers(members);
 
             rooms[roomIndex].inGame = true;
-            rooms[roomIndex].game.state = game.createNewGame(null, playersIds, playersNicknames);
+            rooms[roomIndex].state = game.createNewGame(null, players);
 
             console.log(`> New game created on room ${rooms[roomIndex].key}`)
             io.emit("_server_gameStarted", rooms[roomIndex]);
@@ -166,10 +168,12 @@ const { match } = require('assert');
                 clients[otherPlayerIndex].onQueue = false;
                 matchQueue.splice(0, 2);
 
-                const playersNicknames = [clients[otherPlayerIndex].nickname, clients[clientIndex].nickname];
                 
                 const newRoom = createRoom(rooms, clients[otherPlayerIndex], clients[clientIndex], true, true);
-                newRoom.game.state = game.createNewGame(null, playersIds, playersNicknames);
+
+                const players = getPlayers(newRoom.members);
+
+                newRoom.state = game.createNewGame(null, players);
 
                 io.emit('_server_createdMatch', newRoom, playersIds);
             }
@@ -203,9 +207,9 @@ const { match } = require('assert');
             const roomIndex = findRoomByKey(clients[clientIndex].currentRoomKey, rooms);
             if (roomIndex === false) return; // !!! TODO
 
-            game.executeAction(rooms[roomIndex].game.state, socket.id, command);
+            game.executeAction(rooms[roomIndex].state, socket.id, command);
             
-            if (rooms[roomIndex].game.state.winner != null) { // If a player won the game, emit a different command.
+            if (rooms[roomIndex].state.winner != null) { // If a player won the game, emit a different command.
                 rooms[roomIndex].inGame = false;
                 io.emit("_server_playerWonGame", rooms[roomIndex])
             } else {
@@ -251,7 +255,7 @@ function findRoomByKey (roomKey, rooms) {
     }
     return false;
 }
-function findPlayerOnRoom (playerId, playerList) {
+function findMemberOnRoom (playerId, playerList) {
     for (let i in playerList) {
         if (playerList[i].id == playerId) return i;
     }
@@ -275,14 +279,23 @@ function generateRoomKey (rooms) {
 }
 
 // Count how many players the room currently have:
-function countPlayers (playerList) {
+function countPlayers (memberArray) {
     let quantity = 0;
-    for(let p of playerList) {
-        if(!p.spectator) quantity++;
+    for(let m of memberArray) {
+        if(!m.spectator) quantity++;
     }
     return quantity;
 }
 
+function getPlayers (memberArray) {
+    const playerArray = [];
+    for (let m of memberArray) {
+        if (!(m.spectator)) {
+            playerArray.push(m);
+        }
+    }
+    return playerArray;
+}
 // Handle client disconnecting from the server
 function clientLeft (clients, clientIndex, rooms, matchQueue, io, socket) {
     const client = clients[clientIndex];
@@ -304,23 +317,23 @@ function playerLeft (client, rooms, io) {
 
     const room = rooms[roomIndex]
 
-    const playerIndex = findPlayerOnRoom(client.id, room.players);
+    const playerIndex = findMemberOnRoom(client.id, room.members);
     if (playerIndex === false) return; // !!! TODO Player not found on room list;
 
-    const wasPlayer = !room.players[playerIndex].spectator;
+    const wasPlayer = !room.members[playerIndex].spectator;
 
-    room.players.splice(playerIndex, 1);
+    room.members.splice(playerIndex, 1);
     client.currentRoomKey = null;
 
-    if (rooms[roomIndex].players.length <= 0) { // If there's no players left, delete room:
+    if (rooms[roomIndex].members.length <= 0) { // If there's no players left, delete room:
         rooms.splice(roomIndex, 1);
     } else {
-        if (client.id == room.owner && room.players.length > 0) { // If the player was the owner, find a new one:
+        if (client.id == room.owner && room.members.length > 0) { // If the player was the owner, find a new one:
             let nextOwner = 0;
-            while (room.players[nextOwner] == null) {
+            while (room.members[nextOwner] == null) {
                 nextOwner++
             };
-            room.owner = room.players[nextOwner].id
+            room.owner = room.members[nextOwner].id
         }
 
     }
@@ -328,16 +341,16 @@ function playerLeft (client, rooms, io) {
     if (wasPlayer) {
         room.inGame = false;
     }
-    
+
     io.emit('_server_playerLeftRoom', room, client.id, wasPlayer);
 }
 
 
-// Create room function: create a room with 1 or 2 players and return it
+// Create room function: create a room with 1 or 2 members and return it
 function createRoom (rooms, player0, player1, private=false, inGame=false) {
     const newRoom = {
         key:generateRoomKey(rooms),
-        players:[{
+        members:[{
             id:player0.id, nickname:player0.nickname, spectator:false, // Server data
             victories:0 // Game data
         }],
@@ -351,7 +364,7 @@ function createRoom (rooms, player0, player1, private=false, inGame=false) {
     player0.currentRoomKey = newRoom.key;
     
     if (player1) {
-        newRoom.players.push(
+        newRoom.members.push(
             {
                 id:player1.id, nickname:player1.nickname, spectator:false, // Server data
                 victories:0 // Game data

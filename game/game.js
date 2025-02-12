@@ -7,13 +7,15 @@ const defaultConfig = {
 const objects = require("./objects.js");
 const allCards = require("./cards.js");
 
-function createNewGame (config, playersIds, playersNicknames) {
+function createNewGame (config, players) {
     config = config ? config : defaultConfig;
+
+    console.log(players);
 
     const state = {
         players: [
-            {cards:[], cardQueuePosition:0, cardQueue: createCardQueue(config), souls:0, id:playersIds[0], nickname:playersNicknames[0]},
-            {cards:[], cardQueuePosition:0, cardQueue: createCardQueue(config), souls:0, id:playersIds[1], nickname:playersNicknames[1]}
+            {cards:[], cardQueuePosition:0, cardQueue: createCardQueue(config), souls:0, id:players[0].id, nickname:players[0].nickname},
+            {cards:[], cardQueuePosition:0, cardQueue: createCardQueue(config), souls:0, id:players[1].id, nickname:players[1].nickname}
         ],
         winner:null,
         currentPlayer:0,
@@ -103,6 +105,8 @@ function executeAction (state, playerId, command) {
     if (playerIndex != state.currentPlayer) return;
 
     if (selectedTile.object.team != playerIndex) return;
+
+    if (playerId != state.players[playerIndex].id) return;
 
     let corresponded = false;
     

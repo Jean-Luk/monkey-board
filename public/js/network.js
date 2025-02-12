@@ -74,8 +74,9 @@ export default function createNetwork () {
         if (!(players.includes(status.myId))) return;
         status.currentRoom = room;
 
-        room.game.state.myIndex = room.game.state.players[0].id == status.myId ? 0 : 1;
-        notifyAll({event:"gameStarted", state:room.game.state, players:room.players})
+        const myIndex = room.state.players[0].id == status.myId ? 0 : 1;
+
+        notifyAll({event:"gameStarted", state:room.state, players:room.members, myIndex})
     });
 
     socket.on('_server_playerLeftRoom', (room, playerId, wasPlayer) => {
@@ -95,29 +96,32 @@ export default function createNetwork () {
         if (status.currentRoom && room.key != status.currentRoom.key) return;
 
         status.currentRoom = room;
+        const myIndex = room.state.players[0].id == status.myId ? 0 : 1;
+        let isSpectator = false;
 
-        room.game.state.myIndex = room.game.state.players[0].id == status.myId ? 0 : 1;
-        notifyAll({event:"gameStarted", state:room.game.state, players:room.players})
+        if (room.state.players[0].id != status.myId && room.state.players[1].id != status.myId) {
+            isSpectator = true;            
+        }
+        
+        notifyAll({event:"gameStarted", state:room.state, players:room.members, myIndex, isSpectator})
     })
 
     socket.on('_server_playerExecutedAction', (room) => {
         if (status.currentRoom && room.key != status.currentRoom.key) return;
 
-        notifyAll({event:"playerExecutedAction", state:room.game.state});
+        notifyAll({event:"playerExecutedAction", state:room.state});
     })
 
     socket.on('_server_playerWonGame', (room) => {
         if (status.currentRoom && room.key != status.currentRoom.key) return;
         
-        const command = {event:"playerWonGame", state:room.game.state, winner:room.game.state.winner, players:room.players}
+        const command = {event:"playerWonGame", state:room.state, winner:room.state.winner, players:room.members}
 
         notifyAll(command);
         notifyAll({event:"gameEnded"});
     })
 
     socket.on("server_error_joinRoom", (error) => {
-        alert(error);
-
         const command = {event:"errorJoiningRoom", error}
         notifyAll(command);
     })

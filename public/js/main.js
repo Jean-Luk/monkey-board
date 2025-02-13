@@ -48,6 +48,7 @@ interfaceManager.subscribe((command) => {
         mouseListener.unsubscribe(game.gameClick)
     }
 
+    network.interfaceUpdate(command);
     roomManager.inputUpdate(command, network);
     game.interfaceUpdate(command);
 })

@@ -10,8 +10,6 @@ const allCards = require("./cards.js");
 function createNewGame (config, players) {
     config = config ? config : defaultConfig;
 
-    console.log(players);
-
     const state = {
         players: [
             {cards:[], cardQueuePosition:0, cardQueue: createCardQueue(config), souls:0, id:players[0].id, nickname:players[0].nickname},

@@ -19,17 +19,24 @@ export default function createNetwork () {
     }
 
     function gameUpdate (command) {
-        if (command.event === "executeAction") {
+        const updates = {};
+
+        updates["executeAction"] = function (command) {
             socket.emit("client_executeAction", command);
         }
+
+        if (updates[command.event]) updates[command.event](command);
     }
 
-    function inputUpdate (command, room) {
-        if (command.event === "joinRoom") {
-            const roomKey = command.key
+    function interfaceUpdate (command) {
+        const updates = {};
+
+        updates["buttonWatchMatchClicked"] = function (command) {
+            socket.emit("client_watch_match");
         }
-    }
 
+        if (updates[command.event]) updates[command.event](command);
+    }
     function getCurrentRoom () {
         return status.currentRoom;
     }
@@ -106,6 +113,15 @@ export default function createNetwork () {
         notifyAll({event:"gameStarted", state:room.state, players:room.members, myIndex, isSpectator})
     })
 
+    socket.on('server_playerWatchingMatch', (room) => {
+        status.currentRoom = room;
+        const myIndex = 1;
+        let isSpectator = true;
+
+        notifyAll({event:"gameStarted", state:room.state, players:room.members, myIndex, isSpectator})
+
+    })
+
     socket.on('_server_playerExecutedAction', (room) => {
         if (status.currentRoom && room.key != status.currentRoom.key) return;
 
@@ -135,7 +151,8 @@ export default function createNetwork () {
     })
 
     return {
-        inputUpdate, getCurrentRoom, gameUpdate, subscribe,
+        getCurrentRoom, subscribe,
+        gameUpdate, interfaceUpdate,
         socket,
     }
 }

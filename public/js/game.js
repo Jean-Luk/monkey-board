@@ -106,7 +106,8 @@ export default function createState (canvas) {
     }
 
     function gameClick ( command ) {
-        // Verify if clicked in any element that belongs to the game
+        if (localState.isSpectator) return; // Prevents spectators from interacting with the board;
+        // Verify if clicked in any element that belongs to the game;
 
         const xClick = command.x;
         const yClick = command.y;
@@ -136,7 +137,7 @@ export default function createState (canvas) {
         
         const clickedOnPossibleAction = checkIfClickedOnPossibleAction(newSelectedTile);
 
-        if (clickedOnPossibleAction && !(localState.isSpectator)) {
+        if (clickedOnPossibleAction) {
             executeAction(newSelectedTile)
             return;
         }

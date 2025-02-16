@@ -227,6 +227,19 @@ const { count } = require('console');
             
         })
 
+        // Client request to watch match
+        socket.on('client_watch_match', () => {
+            const clientIndex = findClientById (socket.id, clients);
+            if (clientIndex === false) return; // !!! TODO
+            if (!clients[clientIndex].currentRoomKey) return; // Not in a room
+            
+            const roomIndex = findRoomByKey(clients[clientIndex].currentRoomKey, rooms);
+            if (roomIndex === false) return; // !!! TODO
+
+            socket.emit('server_playerWatchingMatch', rooms[roomIndex]);
+            
+        })
+
         socket.on('disconnect', () => {
             const clientIndex = findClientById(socket.id, clients);
             if (clientIndex === false) return;

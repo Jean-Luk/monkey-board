@@ -284,6 +284,7 @@ export default function createInterfaceManager () {
     function openGameLobby (room, myId) {
         closeAllMenus();
 
+        findSpanById('span_game-lobby_warnings').innerHTML = "";
         findSpanById('room-key').innerHTML = room.key;        
         updatePlayerList(room, myId);
 
@@ -294,6 +295,15 @@ export default function createInterfaceManager () {
             findInputById("button_start_game").style.display = ''
         } else {
             findInputById("button_start_game").style.display = 'none'
+        }
+
+        if (room.inGame) {
+            findSpanById('span_game-lobby_warnings').innerHTML = "<i>This room is currently in-game.</i> <input type='button' value='Watch' id='button_watch_match'><br/>";
+            findInputById("button_watch_match").addEventListener("click", () => {
+                const command = {event:"buttonWatchMatchClicked"};
+                notifyAll(command);
+            })
+        
         }
     }
 
